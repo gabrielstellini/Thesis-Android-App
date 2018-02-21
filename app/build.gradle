@@ -28,10 +28,17 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
+//  Microsoft band library
     implementation files('libs/microsoft-band-1.3.20307.2.jar')
     compile fileTree(dir: 'libs', include: '*.jar')
 
+//  Auth0 libraries
     compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'com.auth0.android:auth0:1.10.0'
     testCompile 'junit:junit:4.12'
+
+//  gson library
+    compile 'com.google.code.gson:gson:2.8.1'
+
 }
