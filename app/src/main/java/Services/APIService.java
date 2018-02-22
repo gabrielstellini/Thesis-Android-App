@@ -17,69 +17,82 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 
-public class APIService extends Activity implements APIServiceCallback{
+public class APIService implements APIServiceCallback{
 
+    private static final String BASE_API_URL = "http://192.168.4.194:3010/";
     private static final String API_IDENTIFIER = "Android";
-    protected static String accessToken;
+    private static String accessToken;
+
     protected static Gson gson = new Gson();
 
+    private static APIService apiService = new APIService();
+    private static ArrayList<APIServiceCallback> subscribers = new ArrayList<>();
 
-    protected void callAPI(String API_URL) {
+
+
+    private APIService(){
+    }
+
+
+    public void callAPI(String API_URL, final Activity activity) {
         final Request.Builder reqBuilder = new Request.Builder()
                 .get()
-                .url(API_URL);
+                .url(BASE_API_URL + API_URL);
 
         reqBuilder.addHeader("Authorization", "Bearer " + accessToken);
 
 
         OkHttpClient client = new OkHttpClient();
         Request request = reqBuilder.build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        apiResponseListener(false, "An error occurred");
-                    }
-                });
-            }
+        client.newCall(request)
 
-            @Override
-            public void onResponse(final Response response) throws IOException {
-                runOnUiThread(new Runnable() {
+                .enqueue(new Callback() {
                     @Override
-                    public void run() {
-                        if (response.isSuccessful()) {
-                            try {
-                                apiResponseListener(true, response.body().string());
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                    public void onFailure(Request request, IOException e) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                apiResponseListener(false, "An error occurred");
                             }
+                        });
+                    }
+
+                    @Override
+                    public void onResponse(final Response response) throws IOException {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (response.isSuccessful()) {
+                                    try {
+                                        apiResponseListener(true, response.body().string());
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
 //                            Toast.makeText(LoginActivity.this, "API call success!", Toast.LENGTH_SHORT).show();
 
-                        } else {
-                            apiResponseListener(false, "API call failed");
-                        }
+                                } else {
+                                    apiResponseListener(false, "API call failed");
+                                }
+                            }
+                        });
                     }
                 });
-            }
-        });
     }
 
-    protected void login() {
-        Auth0 auth0 = new Auth0(this);
+    public void login(final Activity activity) {
+        Auth0 auth0 = new Auth0(activity);
         auth0.setOIDCConformant(true);
         WebAuthProvider.init(auth0)
                 .withScheme("demo")
                 .withAudience(API_IDENTIFIER)
                 .withScope("openid profile email")
-                .start(APIService.this, new AuthCallback() {
+                .start(activity, new AuthCallback() {
                     @Override
                     public void onFailure(@NonNull final Dialog dialog) {
-                        runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 dialog.show();
@@ -89,11 +102,11 @@ public class APIService extends Activity implements APIServiceCallback{
 
                     @Override
                     public void onFailure(final AuthenticationException exception) {
-                        runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 loginStatus(401);
-                                Toast.makeText(APIService.this, "Error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "Error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -101,11 +114,11 @@ public class APIService extends Activity implements APIServiceCallback{
                     @Override
                     public void onSuccess(@NonNull final Credentials credentials) {
                         accessToken = credentials.getAccessToken();
-                        runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 loginStatus(200);
-//                                Toast.makeText(APIService.this, "Log in: Success", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "Log in: Success", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -114,11 +127,27 @@ public class APIService extends Activity implements APIServiceCallback{
 
     @Override
     public void apiResponseListener(boolean isSuccess, String payload) {
-
+        for(APIServiceCallback subscriber: subscribers){
+            subscriber.apiResponseListener(isSuccess, payload);
+        }
     }
 
     @Override
     public void loginStatus(int statusCode) {
+        for(APIServiceCallback subscriber: subscribers){
+            subscriber.loginStatus(statusCode);
+        }
+    }
 
+    public static APIService getInstance(){
+        return APIService.apiService;
+    }
+
+    public static void addSubscriber(APIServiceCallback subscriber){
+        subscribers.add(subscriber);
+    }
+
+    public static void removeSubscriber(APIServiceCallback subscriber){
+        subscribers.remove(subscriber);
     }
 }
