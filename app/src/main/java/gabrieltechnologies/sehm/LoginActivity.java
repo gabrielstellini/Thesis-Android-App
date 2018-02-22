@@ -1,42 +1,50 @@
 package gabrieltechnologies.sehm;
 
+import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import Services.APIService;
+import Services.APIServiceCallback;
 
-public class LoginActivity extends APIService {
+public class LoginActivity extends Activity implements APIServiceCallback{
 
-    private static final String API_URL = "http://192.168.4.194:3010/user/";
-    private static final String API_IDENTIFIER = "Android";
-
+    FragmentTransaction fragmentTransaction;
+    Auth0Fragment auth0Fragment;
+    UserDetailsFragment userDetailsFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
-        Button callAPIWithTokenButton = (Button) findViewById(R.id.callAPIWithTokenButton);
-        Button loginWithTokenButton = (Button) findViewById(R.id.loginButton);
 
-        loginWithTokenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
+       auth0Fragment = new Auth0Fragment();
 
-        callAPIWithTokenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
+        //adds listener for login status
+        APIService.addSubscriber(this);
+
+        fragmentTransaction = getFragmentManager().beginTransaction();
+//        fragmentTransaction.add(R.id.flContainer, auth0Fragment);
+        fragmentTransaction.add(R.id.flContainer, auth0Fragment);
+        fragmentTransaction.commit();
     }
 
-    public void loginStatus(int statusCode){
-        Toast.makeText(LoginActivity.this, "Log in status: " + statusCode, Toast.LENGTH_SHORT).show();
+    @Override
+    public void apiResponseListener(boolean isSuccess, String payload) {
+
+    }
+
+    @Override
+    public void loginStatus(int statusCode) {
+        if(statusCode == 200){
+            userDetailsFragment = new UserDetailsFragment();
+
+            fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.remove(auth0Fragment);
+            fragmentTransaction.add(R.id.flContainer, userDetailsFragment);
+            fragmentTransaction.commit();
+        }
     }
 }
