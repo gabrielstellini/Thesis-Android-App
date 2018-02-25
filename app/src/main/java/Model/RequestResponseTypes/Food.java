@@ -1,7 +1,7 @@
 package Model.RequestResponseTypes;
 
 public class Food {
-    private Integer Id;
+    private Integer id;
     private String name;
     private int quantity;
     private int calories;
@@ -31,10 +31,10 @@ public class Food {
     }
 
     public Integer getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Integer id) {
-        Id = id;
+        this.id = id;
     }
 }
