@@ -4,12 +4,12 @@ import java.sql.Time;
 
 public class UserPreference {
     private int id;
-    private Time startTime;
-    private Time endTime;
+    private String startTime;
+    private String endTime;
 
     public UserPreference(){}
 
-    public UserPreference(int id, Time startTime, Time endTime) {
+    public UserPreference(int id, String startTime, String endTime) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -23,19 +23,19 @@ public class UserPreference {
         this.id = id;
     }
 
-    public Time getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Time startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Time getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Time endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 }
