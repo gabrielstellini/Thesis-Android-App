@@ -1,4 +1,4 @@
-package gabrieltechnologies.sehm;
+package Fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import Services.APIService;
+import gabrieltechnologies.sehm.R;
 
 public class Auth0Fragment extends Fragment {
 
