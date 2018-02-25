@@ -1,4 +1,4 @@
-package gabrieltechnologies.sehm;
+package Fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -14,8 +14,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import Model.RequestResponseTypes.SignUpUser;
+import Model.RequestType;
 import Services.APIService;
+import gabrieltechnologies.sehm.R;
 
 public class UserDetailsFragment extends Fragment {
 
@@ -93,10 +97,14 @@ public class UserDetailsFragment extends Fragment {
         SignUpUser signUpUser = new SignUpUser();
         signUpUser.setHasMedication(switch1.isChecked());
         signUpUser.setHasFinancialPressure(switch2.isChecked());
-        signUpUser.setHasEmotionalSupport(switch2.isChecked());
+        signUpUser.setHasEmotionalSupport(switch3.isChecked());
         signUpUser.setMale(isMale);
-        //DateOfBirth missing
+        //DateOfBirth missing - need to convert age into date selector
 
-        APIService.getInstance().callAPI("user/sign-up", getActivity());
+        Gson gson = new Gson();
+
+        String payload = gson.toJson(signUpUser);
+
+        APIService.getInstance().callAPI("user/sign-up", getActivity(), RequestType.POST, payload);
     }
 }
