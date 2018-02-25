@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#faa634</color>
-    <color name="colorPrimaryDark">#c27700</color>
-    <color name="colorAccent">#ffd766</color>
+    <!--<color name="colorPrimary">#faa634</color>-->
+    <!--<color name="colorPrimaryDark">#c27700</color>-->
+    <!--<color name="colorAccent">#ffd766</color>-->
+
+    <!--Lower saturation-->
+    <color name="colorPrimary">#F9BB63</color>
+    <color name="colorPrimaryDark">#C1954D</color>
+    <color name="colorAccent">#FFD766</color>
 </resources>
