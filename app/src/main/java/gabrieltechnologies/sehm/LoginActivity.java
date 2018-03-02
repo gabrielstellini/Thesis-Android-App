@@ -37,7 +37,6 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
 
         //skip whole process and jump to page
 //        loginStatus(200);
-//        apiResponseListener(true, "", "user/sign-up");
 //        finishedSavingEatingTimes();
     }
 
@@ -46,7 +45,7 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl) {
+    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
         if(isSuccess){
             if(apiUrl.matches(".+sign-up")){
 

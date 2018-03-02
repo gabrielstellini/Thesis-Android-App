@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import Model.RequestType;
 import Services.APIServiceCallback;
 import gabrieltechnologies.sehm.R;
 
@@ -70,7 +72,7 @@ public class PreferencesFragment extends Fragment implements APIServiceCallback{
 //    }
 //
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl) {
+    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
 //        if(isSuccess){
 //            Toast.makeText(getActivity(), "Update successful", Toast.LENGTH_SHORT).show();
 //        } else if(!isSuccess){

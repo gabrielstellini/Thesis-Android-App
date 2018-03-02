@@ -146,7 +146,7 @@ public class EatingTimesFragment extends Fragment implements APIServiceCallback,
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl) {
+    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
         numberOfPosts++;
 
         if(!isSuccess){

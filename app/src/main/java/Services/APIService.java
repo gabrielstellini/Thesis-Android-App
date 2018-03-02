@@ -26,7 +26,9 @@ import Model.RequestType;
 
 
 public class APIService implements APIServiceCallback{
-    private static final String BASE_API_URL = "http://192.168.4.194:3010/";
+    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
+//    private static final String BASE_API_URL = "http://192.168.4.119:3010/";
+//    private static final String BASE_API_URL = "http://192.168.8.102:3010/";
 //    private static final String BASE_API_URL = "http://localhost:3010/";
     private static final String API_IDENTIFIER = "Android";
     private static String accessToken;
@@ -41,77 +43,77 @@ public class APIService implements APIServiceCallback{
     }
 
     public void callAPI(final String API_URL, final Activity activity, final RequestType requestType, final String payload) {
-
-        final Request.Builder reqBuilder = new Request.Builder();
-
-        if(requestType == RequestType.GET){
-            reqBuilder
-                    .get()
-                    .url(BASE_API_URL + API_URL);
-        }else {
-            RequestBody requestBody = RequestBody.create(JSON, payload);
-
-            if(requestType == RequestType.POST){
-                reqBuilder
-                        .post(requestBody)
-                        .url(BASE_API_URL + API_URL);
-            }else if(requestType == RequestType.PUT){
-                reqBuilder
-                        .put(requestBody)
-                        .url(BASE_API_URL + API_URL);
-            }else if(requestType == RequestType.DELETE){
-                reqBuilder
-                        .delete(requestBody)
-                        .url(BASE_API_URL + API_URL);
-            }
-        }
-        reqBuilder.addHeader("Authorization", "Bearer " + accessToken);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = reqBuilder.build();
-        client.newCall(request)
+                final Request.Builder reqBuilder = new Request.Builder();
 
-                .enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Request request, IOException e) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                apiResponseListener(false, "An error occurred", API_URL);
-                            }
-                        });
+                if(requestType == RequestType.GET){
+                    reqBuilder
+                            .get()
+                            .url(BASE_API_URL + API_URL);
+                }else {
+                    RequestBody requestBody = RequestBody.create(JSON, payload);
+
+                    if(requestType == RequestType.POST){
+                        reqBuilder
+                                .post(requestBody)
+                                .url(BASE_API_URL + API_URL);
+                    }else if(requestType == RequestType.PUT){
+                        reqBuilder
+                                .put(requestBody)
+                                .url(BASE_API_URL + API_URL);
+                    }else if(requestType == RequestType.DELETE){
+                        reqBuilder
+                                .delete(requestBody)
+                                .url(BASE_API_URL + API_URL);
                     }
+                }
+                reqBuilder.addHeader("Authorization", "Bearer " + accessToken);
 
-                    @Override
-                    public void onResponse(final Response response) throws IOException {
-                        activity.runOnUiThread(new Runnable() {
+
+                OkHttpClient client = new OkHttpClient();
+                Request request = reqBuilder.build();
+                client.newCall(request)
+
+                        .enqueue(new Callback() {
                             @Override
-                            public void run() {
-                                if (response.isSuccessful()) {
-                                    try {
-                                        apiResponseListener(true, response.body().string(), API_URL);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                            public void onFailure(Request request, IOException e) {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        apiResponseListener(false, "An error occurred", API_URL, requestType);
                                     }
-//                            Toast.makeText(LoginActivity.this, "API call success!", Toast.LENGTH_SHORT).show();
+                                }).start();
+                            }
 
-                                } else {
-//                                    apiResponseListener(false, "API call failed", API_URL);
+                            @Override
+                            public void onResponse(final Response response) throws IOException {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (response.isSuccessful()) {
+                                            try {
+                                                apiResponseListener(true, response.body().string(), API_URL, requestType);
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
 
-                                    //TODO: remove Hack - APIService needs to be async
-                                    //try again after a bit
-                                    Handler handler = new Handler();
-                                    handler.postDelayed(new Runnable() {
-                                        public void run() {
+
+                                        } else {
+//                                            Toast.makeText(activity, "API call failed :( !", Toast.LENGTH_SHORT).show();
+                                            apiResponseListener(false, "API call failed", API_URL, requestType);
                                             callAPI(API_URL, activity, requestType, payload);
                                         }
-                                    }, 250);   //1 second
-                                }
+                                    }
+                                }).start();
                             }
                         });
-                    }
-                });
+
+            }
+        }).start();
     }
 
 
@@ -159,9 +161,9 @@ public class APIService implements APIServiceCallback{
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl) {
+    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
         for(APIServiceCallback subscriber: subscribers){
-            subscriber.apiResponseListener(isSuccess, payload, apiUrl);
+            subscriber.apiResponseListener(isSuccess, payload, apiUrl, requestType);
         }
     }
 
