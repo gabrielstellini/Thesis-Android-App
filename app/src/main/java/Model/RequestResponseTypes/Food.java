@@ -5,6 +5,7 @@ public class Food {
     private String name;
     private int quantity;
     private int calories;
+    private long timestamp;
 
     public String getName() {
         return name;
@@ -36,5 +37,13 @@ public class Food {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
