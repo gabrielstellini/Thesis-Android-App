@@ -1,24 +1,16 @@
 package Model.RequestResponseTypes;
 
 public class Score {
-    private String date;
-    private int Points;
+    private long timestamp;
+    private int points;
     private int caloriesBurnt;
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
     public int getPoints() {
-        return Points;
+        return points;
     }
 
     public void setPoints(int points) {
-        Points = points;
+        this.points = points;
     }
 
     public int getCaloriesBurnt() {
@@ -27,5 +19,13 @@ public class Score {
 
     public void setCaloriesBurnt(int caloriesBurnt) {
         this.caloriesBurnt = caloriesBurnt;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
