@@ -46,4 +46,6 @@ dependencies {
 //  gson library
     compile 'com.google.code.gson:gson:2.8.1'
 
+//  Circular animations
+    compile 'com.github.jaouan:revealator:1.2.1'
 }
