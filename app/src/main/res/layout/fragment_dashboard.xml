@@ -127,7 +127,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="88dp"
             android:fontFamily="@font/roboto_medium"
-            android:text="Please do not eat right now You are scheduled to eat in 1hr 30min"
+            android:text="Loading..."
             android:textAlignment="center"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
