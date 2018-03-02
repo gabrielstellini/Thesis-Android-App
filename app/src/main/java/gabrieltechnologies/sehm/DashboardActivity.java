@@ -32,6 +32,7 @@ public class DashboardActivity extends AppCompatActivity
     PreferencesFragment preferencesFragment = new PreferencesFragment();
 
     Fragment currFragment = null;
+    int selectedItem = R.id.nav_dashboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,8 @@ public class DashboardActivity extends AppCompatActivity
         textView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                    Toast.makeText(DashboardActivity.this, "LOGOUT CALLED", Toast.LENGTH_SHORT).show();
-                    return true;
+                Toast.makeText(DashboardActivity.this, "LOGOUT CALLED", Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
 
@@ -65,6 +66,7 @@ public class DashboardActivity extends AppCompatActivity
         fragmentTransaction.add(R.id.dashboardContainer, dashboardFragment).commit();
         navigationView.getMenu().getItem(0).setChecked(true);
         currFragment = dashboardFragment;
+        selectedItem = 0;
     }
 
     @Override
@@ -103,39 +105,48 @@ public class DashboardActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-
-        if(currFragment != null){
-            FragmentTransaction removalTransaction = getFragmentManager().beginTransaction();
-            removalTransaction.remove(currFragment);
-            currFragment = null;
-            removalTransaction.commit();
-        }
-
-        //start transaction
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_dashboard) {
-            fragmentTransaction.add(R.id.dashboardContainer, dashboardFragment);
-            currFragment = dashboardFragment;
-        } else if (id == R.id.nav_food) {
-            fragmentTransaction.add(R.id.dashboardContainer, foodFragment);
-            currFragment = foodFragment;
-        } else if (id == R.id.nav_friends) {
-            fragmentTransaction.add(R.id.dashboardContainer, friendsFragment);
-            currFragment = friendsFragment;
-        }
+        //ignore when user clicks same item
+        if(id != selectedItem){
+            selectedItem = id;
+
+            if(currFragment != null){
+                FragmentTransaction removalTransaction = getFragmentManager().beginTransaction();
+                removalTransaction.remove(currFragment);
+                currFragment = null;
+                removalTransaction.commit();
+            }
+
+            //start transaction
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+            // Handling navigation view item clicks here.
+
+            if (id == R.id.nav_dashboard) {
+                fragmentTransaction.replace(R.id.dashboardContainer, dashboardFragment);
+                currFragment = dashboardFragment;
+            } else if (id == R.id.nav_food) {
+                fragmentTransaction.replace(R.id.dashboardContainer, foodFragment);
+                currFragment = foodFragment;
+            } else if (id == R.id.nav_friends) {
+                fragmentTransaction.replace(R.id.dashboardContainer, friendsFragment);
+                currFragment = friendsFragment;
+            }
 //        else if(id == R.id.nav_preferences){
 //            fragmentTransaction.add(R.id.dashboardContainer, preferencesFragment);
 //            currFragment = preferencesFragment;
 //        }
 
-        fragmentTransaction.commit();
+            fragmentTransaction.commit();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+
+        }else {
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+        }
         return true;
     }
 }
