@@ -6,6 +6,7 @@
 
     <!--Lower saturation-->
     <color name="colorPrimary">#F9BB63</color>
-    <color name="colorPrimaryDark">#C1954D</color>
-    <color name="colorAccent">#FFD766</color>
+    <color name="colorPrimaryDark">#c2a473</color>
+    <color name="colorAccent">#ffebb2</color>
+    <color name="grey">#FEFFEF</color>
 </resources>
