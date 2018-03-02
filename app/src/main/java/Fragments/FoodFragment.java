@@ -1,25 +1,38 @@
 package Fragments;
 
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.FrameLayout;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import Model.RequestResponseTypes.Food;
+import Model.RequestType;
+import Services.APIService;
+import Services.APIServiceCallback;
 import gabrieltechnologies.sehm.R;
 import android.app.Fragment;
 
-public class FoodFragment extends Fragment {
+import com.google.gson.Gson;
+import com.jaouan.revealator.Revealator;
+
+public class FoodFragment extends Fragment implements APIServiceCallback {
+    private Gson gson = new Gson();
+
+    private View mRevealView;
+
+    TableLayout tableLayout;
+    private FloatingActionButton floatingActionButton;
+    private EditText addFoodName;
+    private EditText addFoodCalories;
+    private EditText addFoodQuantity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,58 +45,137 @@ public class FoodFragment extends Fragment {
         return view;
     }
 
-    public void initialise(View view){
-        FloatingActionButton floatingActionButton = view.findViewById(R.id.add_food);
+    public void initialise(View view) {
+        floatingActionButton = view.findViewById(R.id.add_food_btn);
+        addFoodName = view.findViewById(R.id.add_food_name);
+        addFoodCalories = view.findViewById(R.id.add_food_calories);
+        addFoodQuantity = view.findViewById(R.id.add_food_quantity);
+
+        APIService.addSubscriber(this);
+        getData();
+
         initialiseTable(view);
+        initialiseAnimations(view);
+        initialiseButtons(view);
+
     }
 
-    public void initialiseTable(View view){
-        TableLayout tableLayout = view.findViewById(R.id.table_main);
+    public void initialiseButtons(View view){
+        Button button = view.findViewById(R.id.send_food_btn);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSubmit();
+            }
+        });
+    }
+
+
+    public void initialiseAnimations(View view){
+        //initialise add button
+        mRevealView = view.findViewById(R.id.add_food);
+        Button cancelBtn = view.findViewById(R.id.cancel_btn);
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Revealator.reveal(mRevealView)
+                        .from(floatingActionButton)
+                        .withCurvedTranslation()
+                        //.withCurvedTranslation(curvePoint)
+                        //.withChildsAnimation()
+                        //.withDelayBetweenChildAnimation(...)
+                        //.withChildAnimationDuration(...)
+                        // .withTranslateDuration(500)
+                        //.withHideFromViewAtTranslateInterpolatedTime(...)
+                        .withRevealDuration(500)
+                        //.withEndAction(...)
+                        .start();
+            }
+        });
+
+
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Revealator.unreveal(mRevealView)
+                        .to(floatingActionButton)
+                        .withCurvedTranslation()
+                        .withUnrevealDuration(500)
+                        .start();
+            }
+        });
+    }
+
+    public void onSubmit(){
+        Food food = new Food();
+
+        String foodName = addFoodName.getText().toString();
+        int quantity = Integer.valueOf(addFoodQuantity.getText().toString());
+        int calories = Integer.valueOf(addFoodCalories.getText().toString());
+
+
+        Revealator.unreveal(mRevealView)
+                .to(floatingActionButton)
+                .withCurvedTranslation()
+                .withUnrevealDuration(500)
+                .start();
+
+        food.setName(foodName);
+        food.setQuantity(quantity);
+        food.setCalories(calories);
+
+        postData(food);
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Do something after 5s = 5000ms
+                getData();
+            }
+        }, 1000);
+
+
+
+    }
+
+
+
+    public void getData() {
+        APIService.getInstance().callAPI("food", getActivity(), RequestType.GET, "");
+    }
+
+    @Override
+    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
+        if (isSuccess) {
+            if (apiUrl.matches(".*food") && requestType == RequestType.GET) {
+                Food[] foods = gson.fromJson(payload, Food[].class);
+                clearRowData();
+                addTableData(foods);
+            }
+        }
+    }
+
+
+    public void initialiseTable(View view) {
+        tableLayout = view.findViewById(R.id.table_main);
         tableLayout.setStretchAllColumns(true);
         tableLayout.bringToFront();
-
-        Food[] foods = new Food[40];
-
-        for (int i = 0; i < foods.length; i++){
-            foods[i] = new Food();
-            foods[i].setCalories(i*1000);
-            foods[i].setName(String.valueOf(i));
-            foods[i].setQuantity(10);
-        }
-//
-//        TableRow th = new TableRow(getActivity());
-//
-//        TextView h1 = new TextView(getActivity());
-//        TextView h2 = new TextView(getActivity());
-//        TextView h3 = new TextView(getActivity());
-//
-//        h1.setText("Name");
-//        h2.setText("Calories");
-//        h3.setText("Quantity");
-//
-//        h1.setTextAppearance(getActivity(), R.style.TableHeaderField);
-//        h2.setTextAppearance(getActivity(), R.style.TableHeaderField);
-//        h3.setTextAppearance(getActivity(), R.style.TableHeaderField);
-//
-//        h1.setGravity(Gravity.CENTER);
-//        h2.setGravity(Gravity.CENTER);
-//        h3.setGravity(Gravity.CENTER);
-
-//        th.addView(h1);
-//        th.addView(h2);
-//        th.addView(h3);
-//
-//        tableLayout.addView(th);
+    }
 
 
-        for(int i = 0; i < foods.length; i++){
-            TableRow tr =  new TableRow(getActivity());
+    public void addTableData(Food[] foods) {
+        for (Food food : foods) {
+            final TableRow tr = new TableRow(getActivity());
             TextView c1 = new TextView(getActivity());
-            c1.setText(foods[i].getName());
+            c1.setText(food.getName());
             TextView c2 = new TextView(getActivity());
-            c2.setText(String.valueOf(foods[i].getCalories()));
+            c2.setText(String.valueOf(food.getCalories()));
             TextView c3 = new TextView(getActivity());
-            c3.setText(String.valueOf(foods[i].getQuantity()));
+            c3.setText(String.valueOf(food.getQuantity()));
 
             tr.addView(c1);
             tr.addView(c2);
@@ -98,27 +190,45 @@ public class FoodFragment extends Fragment {
             c2.setGravity(Gravity.CENTER);
             c3.setGravity(Gravity.CENTER);
 
-            tableLayout.addView(tr);
+            this.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    tableLayout.addView(tr);
+                }
+            });
 
 
         }
-
-
-        //TODO: find table by id
-        //TODO: add listener to button
-
-
     }
 
-    public void onAddClicked(){
-
+    public void clearRowData() {
+        this.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int count = tableLayout.getChildCount();
+                for (int i = 1; i < count; i++) {
+                    View child = tableLayout.getChildAt(i);
+                    if (child instanceof TableRow) {
+                        ((ViewGroup) child).removeAllViews();
+                    }
+                }
+            }
+        });
     }
 
-    public void postData(){
-//        Gson gson = new Gson();
-//
-//        String payload = gson.toJson(signUpUser);
-//
-//        APIService.getInstance().callAPI("user/sign-up", getActivity(), RequestType.POST, payload);
+    public void postData(Food food) {
+        Gson gson = new Gson();
+        String payload = gson.toJson(food);
+        APIService.getInstance().callAPI("food", getActivity(), RequestType.POST, payload);
+    }
+
+    @Override
+    public void loginStatus(int statusCode) { }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        APIService.removeSubscriber(this);
     }
 }

@@ -46,4 +46,8 @@
     <string name="points_earned_this_week">Points earned this week:</string>
     <string name="overview">Overview</string>
     <string name="points_earned_today">Points earned today:</string>
+    <string name="add_food">Add food</string>
+    <string name="food_name">Food name</string>
+    <string name="cancel">Cancel</string>
+    <string name="submit">Submit</string>
 </resources>
