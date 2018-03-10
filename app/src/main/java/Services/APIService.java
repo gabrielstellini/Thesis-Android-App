@@ -26,8 +26,8 @@ import Model.RequestType;
 
 
 public class APIService implements APIServiceCallback{
-    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
-//    private static final String BASE_API_URL = "http://192.168.4.119:3010/";
+//    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
+    private static final String BASE_API_URL = "http://192.168.4.119:3010/";
 //    private static final String BASE_API_URL = "http://192.168.8.102:3010/";
 //    private static final String BASE_API_URL = "http://localhost:3010/";
     private static final String API_IDENTIFIER = "Android";
