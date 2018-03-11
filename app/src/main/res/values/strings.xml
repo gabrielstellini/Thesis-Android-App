@@ -50,4 +50,6 @@
     <string name="food_name">Food name</string>
     <string name="cancel">Cancel</string>
     <string name="submit">Submit</string>
+    <string name="score_today">Score Today</string>
+    <string name="score_this_week">Score this week</string>
 </resources>
