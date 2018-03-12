@@ -46,8 +46,6 @@ public class APIService implements APIServiceCallback{
         new Thread(new Runnable() {
             @Override
             public void run() {
-
-
                 final Request.Builder reqBuilder = new Request.Builder();
 
                 if(requestType == RequestType.GET){
@@ -84,7 +82,7 @@ public class APIService implements APIServiceCallback{
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        apiResponseListener(false, "An error occurred", API_URL, requestType);
+                                        apiResponseListener(false, payload,"An error occurred", API_URL, requestType);
                                     }
                                 }).start();
                             }
@@ -96,7 +94,7 @@ public class APIService implements APIServiceCallback{
                                     public void run() {
                                         if (response.isSuccessful()) {
                                             try {
-                                                apiResponseListener(true, response.body().string(), API_URL, requestType);
+                                                apiResponseListener(true, payload, response.body().string(), API_URL, requestType);
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
@@ -104,7 +102,7 @@ public class APIService implements APIServiceCallback{
 
                                         } else {
 //                                            Toast.makeText(activity, "API call failed :( !", Toast.LENGTH_SHORT).show();
-                                            apiResponseListener(false, "API call failed", API_URL, requestType);
+                                            apiResponseListener(false, payload, "API call failed", API_URL, requestType);
                                             callAPI(API_URL, activity, requestType, payload);
                                         }
                                     }
@@ -161,9 +159,9 @@ public class APIService implements APIServiceCallback{
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
+    public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
         for(APIServiceCallback subscriber: subscribers){
-            subscriber.apiResponseListener(isSuccess, payload, apiUrl, requestType);
+            subscriber.apiResponseListener(isSuccess,originalPayload, payload, apiUrl, requestType);
         }
     }
 

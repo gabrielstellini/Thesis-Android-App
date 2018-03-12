@@ -45,7 +45,7 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
+    public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
         if(isSuccess){
             if(apiUrl.matches(".+sign-up")){
 

@@ -72,7 +72,7 @@ public class PreferencesFragment extends Fragment implements APIServiceCallback{
 //    }
 //
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
+    public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
 //        if(isSuccess){
 //            Toast.makeText(getActivity(), "Update successful", Toast.LENGTH_SHORT).show();
 //        } else if(!isSuccess){

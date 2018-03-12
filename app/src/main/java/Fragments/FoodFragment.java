@@ -41,7 +41,6 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
                 container, false);
 
         initialise(view);
-
         return view;
     }
 
@@ -58,11 +57,11 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
         initialiseAnimations(view);
         initialiseButtons(view);
 
+
     }
 
     public void initialiseButtons(View view){
         Button button = view.findViewById(R.id.send_food_btn);
-
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -94,8 +93,6 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
                         .start();
             }
         });
-
-
 
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,9 +134,6 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
                 getData();
             }
         }, 1000);
-
-
-
     }
 
 
@@ -149,7 +143,7 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
+    public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
         if (isSuccess) {
             if (apiUrl.matches(".*food") && requestType == RequestType.GET) {
                 Food[] foods = gson.fromJson(payload, Food[].class);
@@ -196,8 +190,6 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
                     tableLayout.addView(tr);
                 }
             });
-
-
         }
     }
 
