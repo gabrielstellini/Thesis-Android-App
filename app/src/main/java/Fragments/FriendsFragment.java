@@ -1,12 +1,16 @@
 package Fragments;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -14,31 +18,35 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jaouan.revealator.Revealator;
 
-import Model.RequestResponseTypes.Food;
+import java.util.LinkedList;
+
+import CustomView.ICardCallback;
+import CustomView.UserCard;
 import Model.RequestResponseTypes.Friends;
+import Model.RequestResponseTypes.Score;
+import Model.RequestResponseTypes.User;
+import Model.RequestResponseTypes.UserScore;
 import Model.RequestType;
 import Services.APIService;
 import Services.APIServiceCallback;
 import gabrieltechnologies.sehm.R;
 
 
-public class FriendsFragment extends Fragment implements APIServiceCallback{
-    private Gson gson = new Gson();
-
+public class FriendsFragment extends Fragment implements APIServiceCallback, ICardCallback{
     private View mRevealView;
-
-    TableLayout tableLayout;
     private FloatingActionButton floatingActionButton;
-//    private EditText addFoodName;
-//    private EditText addFoodCalories;
-//    private EditText addFoodQuantity;
+    private Button backBtn;
+    TableLayout tableLayout;
+    LinearLayout linearLayout;
+
+    private Gson gson = new Gson();
+    private LinkedList<UserScore> userScores = new LinkedList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friends,
                 container, false);
-
         initialise(view);
 
         return view;
@@ -46,35 +54,19 @@ public class FriendsFragment extends Fragment implements APIServiceCallback{
 
     public void initialise(View view) {
         floatingActionButton = view.findViewById(R.id.add_friends_btn);
-//        addFoodName = view.findViewById(R.id.add_food_name);
-//        addFoodCalories = view.findViewById(R.id.add_food_calories);
-//        addFoodQuantity = view.findViewById(R.id.add_food_quantity);
+        backBtn = view.findViewById(R.id.back_btn);
 
         APIService.addSubscriber(this);
         getData();
 
         initialiseTable(view);
         initialiseAnimations(view);
-        initialiseButtons(view);
-
+        initialiseSearch(view);
     }
-
-    public void initialiseButtons(View view){
-//        Button button = view.findViewById(R.id.send_food_btn);
-
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                onSubmit();
-//            }
-//        });
-    }
-
 
     public void initialiseAnimations(View view){
         //initialise add button
-        mRevealView = view.findViewById(R.id.add_food);
-//        Button cancelBtn = view.findViewById(R.id.cancel_btn);
+        mRevealView = view.findViewById(R.id.add_friend);
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,81 +74,75 @@ public class FriendsFragment extends Fragment implements APIServiceCallback{
                 Revealator.reveal(mRevealView)
                         .from(floatingActionButton)
                         .withCurvedTranslation()
-                        //.withCurvedTranslation(curvePoint)
-                        //.withChildsAnimation()
-                        //.withDelayBetweenChildAnimation(...)
-                        //.withChildAnimationDuration(...)
-                        // .withTranslateDuration(500)
-                        //.withHideFromViewAtTranslateInterpolatedTime(...)
                         .withRevealDuration(500)
-                        //.withEndAction(...)
                         .start();
             }
         });
 
-
-
-//        cancelBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Revealator.unreveal(mRevealView)
-//                        .to(floatingActionButton)
-//                        .withCurvedTranslation()
-//                        .withUnrevealDuration(500)
-//                        .start();
-//            }
-//        });
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Revealator.unreveal(mRevealView)
+                        .to(floatingActionButton)
+                        .withCurvedTranslation()
+                        .withUnrevealDuration(500)
+                        .start();
+            }
+        });
     }
-
-    public void onSubmit(){
-        Food food = new Food();
-
-//        String foodName = addFoodName.getText().toString();
-//        int quantity = Integer.valueOf(addFoodQuantity.getText().toString());
-//        int calories = Integer.valueOf(addFoodCalories.getText().toString());
-//
-//
-//        Revealator.unreveal(mRevealView)
-//                .to(floatingActionButton)
-//                .withCurvedTranslation()
-//                .withUnrevealDuration(500)
-//                .start();
-//
-//        food.setName(foodName);
-//        food.setQuantity(quantity);
-//        food.setCalories(calories);
-//
-//        postData(food);
-//
-//        final Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                // Do something after 5s = 5000ms
-//                getData();
-//            }
-//        }, 1000);
-
-
-
-    }
-
-
 
     public void getData() {
-        APIService.getInstance().callAPI("friend", getActivity(), RequestType.GET, "");
+        APIService.getInstance().callAPI("friends", getActivity(), RequestType.GET, "");
     }
 
     @Override
-    public void apiResponseListener(boolean isSuccess, String payload, String apiUrl, RequestType requestType) {
+    public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
         if (isSuccess) {
-            if (apiUrl.matches(".*friend") && requestType == RequestType.GET) {
-                Friends friends = gson.fromJson(payload, Friends.class);
+            if (apiUrl.matches(".*friends$") && requestType == RequestType.GET) {
+                //reset
                 clearRowData();
-                addTableData(friends);
+                userScores = new LinkedList<>();
+
+                //get friends from API
+                Friends friends = gson.fromJson(payload, Friends.class);
+                getScores(friends);
+            }
+            else if (apiUrl.matches(".*score.*") && requestType == RequestType.GET) {
+//                TODO: fix issue - if user has too many scores or switches the view too quickly, the api might still be responding
+//                Solution a: API service needs to be tied to this fragment
+//                Solution b: pagination
+
+                UserScore userScore = gson.fromJson(payload, UserScore.class);
+                this.userScores.add(userScore);
+                refreshTable();
+            }else if (apiUrl.matches(".*search.*") && requestType == RequestType.GET) {
+//                TODO: fix same issue as above
+                try{
+                    User[] userResults = gson.fromJson(payload, User[].class);
+                    refreshResults(userResults);
+                }catch (Exception e){
+//                    Null userResults
+                    User[] userResults = new User[0];
+                    refreshResults(userResults);
+                }
+            } else if(apiUrl.matches(".*search.*") && requestType == RequestType.POST) {
+                getData();
             }
         }
     }
+
+
+    private void getScores(Friends friends){
+        for(int i = 0; i<friends.getFriends().length; i++){
+            String authId = friends.getFriends()[i];
+            APIService.getInstance().callAPI("score/"+authId, getActivity(), RequestType.GET, "");
+        }
+    }
+
+    private void refreshTable(){
+        addTableData(userScores);
+    }
+
 
 
     public void initialiseTable(View view) {
@@ -166,28 +152,31 @@ public class FriendsFragment extends Fragment implements APIServiceCallback{
     }
 
 
-    public void addTableData(Friends friends) {
-        for (String friendName : friends.getFriends()) {
+    public void addTableData(LinkedList<UserScore> userScores) {
+        for (UserScore userScore: userScores) {
+
+            Score[] scores = userScore.getScores();
+            int totalScore = 0;
+
+            for(int i = 0; i < scores.length; i++){
+                totalScore+=scores[i].getPoints();
+            }
+
             final TableRow tr = new TableRow(getActivity());
             TextView c1 = new TextView(getActivity());
-            c1.setText(friendName);
-//            TextView c2 = new TextView(getActivity());
-//            c2.setText(String.valueOf(food.getCalories()));
-//            TextView c3 = new TextView(getActivity());
-//            c3.setText(String.valueOf(food.getQuantity()));
+            c1.setText(userScore.getUser().getUsername());
+            TextView c2 = new TextView(getActivity());
+            c2.setText(String.valueOf(totalScore));
 
             tr.addView(c1);
-//            tr.addView(c2);
-//            tr.addView(c3);
+            tr.addView(c2);
 
             //set row styling
             c1.setTextAppearance(getActivity(), R.style.TableDataField);
-//            c2.setTextAppearance(getActivity(), R.style.TableDataField);
-//            c3.setTextAppearance(getActivity(), R.style.TableDataField);
+            c2.setTextAppearance(getActivity(), R.style.TableDataField);
 
             c1.setGravity(Gravity.CENTER);
-//            c2.setGravity(Gravity.CENTER);
-//            c3.setGravity(Gravity.CENTER);
+            c2.setGravity(Gravity.CENTER);
 
             this.getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -195,8 +184,6 @@ public class FriendsFragment extends Fragment implements APIServiceCallback{
                     tableLayout.addView(tr);
                 }
             });
-
-
         }
     }
 
@@ -215,13 +202,6 @@ public class FriendsFragment extends Fragment implements APIServiceCallback{
         });
     }
 
-    //all friends including old friends
-    public void postData(Friends friends) {
-        Gson gson = new Gson();
-        String payload = gson.toJson(friends);
-        APIService.getInstance().callAPI("friend", getActivity(), RequestType.POST, payload);
-    }
-
     @Override
     public void loginStatus(int statusCode) { }
 
@@ -230,5 +210,57 @@ public class FriendsFragment extends Fragment implements APIServiceCallback{
     public void onDestroyView() {
         super.onDestroyView();
         APIService.removeSubscriber(this);
+    }
+
+//    Add_friend code
+
+    public void initialiseSearch(View view){
+        linearLayout = view.findViewById(R.id.itemList);
+        SearchView searchView = view.findViewById(R.id.search_bar);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                APIService.getInstance().callAPI("user/search/" + s, getActivity(), RequestType.GET, "");
+                return false;
+            }
+        });
+    }
+
+    public void refreshResults(User[] users){
+//        remove all children
+        this.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(linearLayout.getChildCount() > 0){
+                    linearLayout.removeAllViews();
+                }
+            }
+        });
+
+        for(User user: users){
+            final UserCard userCard = new UserCard(this.getActivity());
+            userCard.setUser(user, this, getActivity());
+
+            this.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    linearLayout.addView(userCard);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void addFriendPressed(String AuthId) {
+        Friends friend = new Friends();
+        friend.setFriends(new String[]{AuthId});
+        Gson gson = new Gson();
+        String payload = gson.toJson(friend);
+        APIService.getInstance().callAPI("friends", getActivity(), RequestType.POST, payload);
     }
 }

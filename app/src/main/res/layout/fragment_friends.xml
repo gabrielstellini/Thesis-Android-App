@@ -63,16 +63,7 @@
                             android:fontFamily="@font/roboto_medium"
                             android:gravity="center"
                             android:padding="8dp"
-                            android:text="@string/score_today" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:fontFamily="@font/roboto_medium"
-                            android:gravity="center"
-                            android:padding="8dp"
-                            android:text="@string/score_this_week" />
+                            android:text="@string/score" />
                     </TableRow>
                 </TableLayout>
                 <!--</RelativeLayout>-->
