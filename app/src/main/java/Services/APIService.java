@@ -21,19 +21,21 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import Model.RequestType;
 
 
 public class APIService implements APIServiceCallback{
 //    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
-    private static final String BASE_API_URL = "http://192.168.4.119:3010/";
+//    private static final String BASE_API_URL = "http://192.168.4.119:3010/";
 //    private static final String BASE_API_URL = "http://192.168.8.102:3010/";
 //    private static final String BASE_API_URL = "http://localhost:3010/";
+    private static final String BASE_API_URL = "http://10.0.0.2:3010/";
     private static final String API_IDENTIFIER = "Android";
     private static String accessToken;
 
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     protected static Gson gson = new Gson();
     private static APIService apiService = new APIService();
@@ -103,7 +105,7 @@ public class APIService implements APIServiceCallback{
                                         } else {
 //                                            Toast.makeText(activity, "API call failed :( !", Toast.LENGTH_SHORT).show();
                                             apiResponseListener(false, payload, "API call failed", API_URL, requestType);
-                                            callAPI(API_URL, activity, requestType, payload);
+//                                            callAPI(API_URL, activity, requestType, payload);
                                         }
                                     }
                                 }).start();
@@ -160,7 +162,8 @@ public class APIService implements APIServiceCallback{
 
     @Override
     public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
-        for(APIServiceCallback subscriber: subscribers){
+        for(Iterator<APIServiceCallback> iterator = subscribers.iterator(); iterator.hasNext();){
+            APIServiceCallback subscriber = iterator.next();
             subscriber.apiResponseListener(isSuccess,originalPayload, payload, apiUrl, requestType);
         }
     }
