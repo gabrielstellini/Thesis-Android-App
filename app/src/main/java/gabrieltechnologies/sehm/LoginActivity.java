@@ -1,25 +1,31 @@
 package gabrieltechnologies.sehm;
 
-import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 
 import Fragments.Auth0Fragment;
+import Fragments.CalibrateFragment;
 import Fragments.EatingTimesFragment;
 import Fragments.UserDetailsFragment;
 import Model.RequestType;
 import Services.APIService;
 import Services.APIServiceCallback;
+import Services.CalibrationCallback;
 import Services.EatingTimesCallback;
 
-public class LoginActivity extends Activity implements APIServiceCallback, EatingTimesCallback{
+public class LoginActivity extends AppCompatActivity implements APIServiceCallback, EatingTimesCallback, CalibrationCallback{
 
     FragmentTransaction fragmentTransaction;
     Auth0Fragment auth0Fragment;
     UserDetailsFragment userDetailsFragment;
     EatingTimesFragment eatingTimesFragment;
+    CalibrateFragment calibrateFragment;
+
+    boolean signUpCalled = false;
+    boolean preferencesCalled = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,7 +43,7 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
 
         //skip whole process and jump to page
 //        loginStatus(200);
-//        finishedSavingEatingTimes();
+//        finishedSignUp();
     }
 
     private void checkIfSignedUp(){
@@ -47,8 +53,8 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
     @Override
     public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
         if(isSuccess){
-            if(apiUrl.matches(".+sign-up")){
-
+            if(apiUrl.matches(".+sign-up") && !signUpCalled){
+                signUpCalled = true;
                 fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.remove(userDetailsFragment).commit();
 
@@ -60,10 +66,11 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
                 fragmentTransaction.commit();
             }
 
-            else if(apiUrl.matches(".+preferences")){
+            else if(apiUrl.matches(".+preferences") && !preferencesCalled){
+                preferencesCalled = true;
                 //skip signUp details
                 if(!payload.equals("[]")){
-                    finishedSavingEatingTimes();
+                    finishedSignUp();
                 }else {
                     userDetailsFragment = new UserDetailsFragment();
 
@@ -72,7 +79,6 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
                     fragmentTransaction.add(R.id.flContainer, userDetailsFragment);
                     fragmentTransaction.commit();
                 }
-
             }
         }
     }
@@ -84,11 +90,29 @@ public class LoginActivity extends Activity implements APIServiceCallback, Eatin
         }
     }
 
-    @Override
-    public void finishedSavingEatingTimes() {
+    public void finishedSignUp() {
         APIService.removeSubscriber(this);
 
         Intent dashboardIntent = new Intent(this, DashboardActivity.class);
+        dashboardIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(dashboardIntent);
+    }
+
+    @Override
+    public void finishedSavingEatingTimes() {
+//        //switch to calibrationScreen
+        calibrateFragment = new CalibrateFragment();
+        calibrateFragment.setCallback(this);
+        fragmentTransaction = getFragmentManager().beginTransaction();
+
+        fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.remove(eatingTimesFragment);
+        fragmentTransaction.add(R.id.flContainer, calibrateFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void calibrationDone() {
+        finishedSignUp();
     }
 }

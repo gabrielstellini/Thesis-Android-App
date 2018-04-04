@@ -23,11 +23,10 @@ import Services.EatingTimesCallback;
 import gabrieltechnologies.sehm.R;
 
 
-public class EatingTimesFragment extends Fragment implements APIServiceCallback, EatingTimesCallback {
+public class EatingTimesFragment extends Fragment implements APIServiceCallback {
 
     ArrayList<TimePicker> timePickers = new ArrayList<>();
     EatingTimesCallback eatingTimesCallback;
-
 
     boolean successfulPost = true;
     int numberOfUserPreferences = 2;
@@ -112,7 +111,7 @@ public class EatingTimesFragment extends Fragment implements APIServiceCallback,
         super.onCreate(savedInstanceState);
     }
 
-    public void postData(Time[] times){
+    public void postData(Time[] times) {
 
         Gson gson = new Gson();
 
@@ -125,20 +124,13 @@ public class EatingTimesFragment extends Fragment implements APIServiceCallback,
 
         APIService.addSubscriber(this);
 
-        for(int i = 0; i<userPreferences.length; i++){
+        for (int i = 0; i < userPreferences.length; i++) {
             userPreferences[i] = new UserPreference();
-            userPreferences[i].setStartTime(times[i*2].getHours() + ":" + times[i*2].getMinutes());
-            userPreferences[i].setEndTime(times[(i*2)+1].getHours() + ":" + times[(i*2)+1].getMinutes());
+            userPreferences[i].setStartTime(times[i * 2].getHours() + ":" + times[i * 2].getMinutes());
+            userPreferences[i].setEndTime(times[(i * 2) + 1].getHours() + ":" + times[(i * 2) + 1].getMinutes());
             String payload = gson.toJson(userPreferences[i]);
             APIService.getInstance().callAPI("user/preferences", getActivity(), RequestType.POST, payload);
         }
-
-        finishedSavingEatingTimes();
-    }
-
-    @Override
-    public void finishedSavingEatingTimes() {
-        eatingTimesCallback.finishedSavingEatingTimes();
     }
 
     public void setEatingTimesCallback(EatingTimesCallback eatingTimesCallback) {
@@ -149,15 +141,15 @@ public class EatingTimesFragment extends Fragment implements APIServiceCallback,
     public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
         numberOfPosts++;
 
-        if(!isSuccess){
-            successfulPost = false;
-        }
         //verify all posts were successful
-        if(numberOfPosts == numberOfUserPreferences && successfulPost){
-            finishedSavingEatingTimes();
-        }else if(!successfulPost){
-            Toast.makeText(getActivity(), "Unsuccessful posts - some or all posts failed", Toast.LENGTH_LONG).show();
+        if (numberOfPosts == numberOfUserPreferences && successfulPost) {
+            eatingTimesCallback.finishedSavingEatingTimes();
         }
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        APIService.removeSubscriber(this);
     }
 
     @Override
