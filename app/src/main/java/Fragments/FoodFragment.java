@@ -13,10 +13,13 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import Model.RequestResponseTypes.DataPoint;
 import Model.RequestResponseTypes.Food;
 import Model.RequestType;
 import Services.APIService;
 import Services.APIServiceCallback;
+import Utils.BandRecorder;
+import Utils.DataStore;
 import gabrieltechnologies.sehm.R;
 import android.app.Fragment;
 
@@ -24,6 +27,9 @@ import com.google.gson.Gson;
 import com.jaouan.revealator.Revealator;
 
 public class FoodFragment extends Fragment implements APIServiceCallback {
+    private final int recordPeriodMillis = 20000;
+
+
     private Gson gson = new Gson();
 
     private View mRevealView;
@@ -33,12 +39,17 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
     private EditText addFoodName;
     private EditText addFoodCalories;
     private EditText addFoodQuantity;
+    private BandRecorder bandRecorder;
+
+    boolean isRecording = false;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_food,
                 container, false);
+        bandRecorder = new BandRecorder(getActivity());
 
         initialise(view);
         return view;
@@ -56,8 +67,6 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
         initialiseTable(view);
         initialiseAnimations(view);
         initialiseButtons(view);
-
-
     }
 
     public void initialiseButtons(View view){
@@ -114,6 +123,8 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
         int calories = Integer.valueOf(addFoodCalories.getText().toString());
 
 
+
+
         Revealator.unreveal(mRevealView)
                 .to(floatingActionButton)
                 .withCurvedTranslation()
@@ -126,14 +137,33 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
 
         postData(food);
 
+
+        //refresh food data
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // Do something after 5s = 5000ms
                 getData();
             }
         }, 1000);
+
+        //start recording band data
+        if(!isRecording){
+            bandRecorder.startRecording((TextView)getActivity().findViewById(R.id.statusText));
+
+            //stop recording after 10minutes
+            final Handler bandHandler = new Handler();
+            bandHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    bandRecorder.stopRecording();
+                    isRecording = false;
+                    //push data when sample is ready
+                    pushStressData();
+                }
+//            }, 600000);
+            }, recordPeriodMillis);
+        }
     }
 
 
@@ -221,6 +251,25 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        bandRecorder.onDestroy();
         APIService.removeSubscriber(this);
+    }
+
+    public void pushStressData(){
+        Gson gson = new Gson();
+        String payload = gson.toJson(DataStore.dataPoints.toArray());
+        APIService.getInstance().callAPI("datapoint", getActivity(), RequestType.POST, payload);
+        DataStore.dataPoints.clear();
+    }
+
+
+    public void pushDummyCalmStressData(){
+        Gson gson = new Gson();
+        DataPoint[] dataPoints = new DataPoint[3];
+        dataPoints[0] = new DataPoint(1522711001, 80,0.79123,2000.1, "LOCKED", "WORN");
+        dataPoints[1] = new DataPoint(1522711301, 80, 0.95123,3000.1, "LOCKED", "WORN");
+        dataPoints[2] = new DataPoint(1522711401, 82, 0.90123,3100.1, "LOCKED", "WORN");
+        String payload = gson.toJson(dataPoints);
+        APIService.getInstance().callAPI("datapoint", getActivity(), RequestType.POST, payload);
     }
 }
