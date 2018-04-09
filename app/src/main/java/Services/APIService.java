@@ -21,17 +21,18 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import Model.RequestType;
 
 
 public class APIService implements APIServiceCallback{
-//    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
-//    private static final String BASE_API_URL = "http://192.168.4.119:3010/";
-//    private static final String BASE_API_URL = "http://192.168.8.102:3010/";
+    //    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
+    private static final String BASE_API_URL = "http://192.168.4.154:3010/";
+    //    private static final String BASE_API_URL = "http://192.168.8.102:3010/";
 //    private static final String BASE_API_URL = "http://localhost:3010/";
-    private static final String BASE_API_URL = "http://10.0.0.2:3010/";
+//    private static final String BASE_API_URL = "http://10.0.0.2:3010/";
     private static final String API_IDENTIFIER = "Android";
     private static String accessToken;
 
@@ -162,10 +163,10 @@ public class APIService implements APIServiceCallback{
 
     @Override
     public void apiResponseListener(boolean isSuccess,String originalPayload, String payload, String apiUrl, RequestType requestType) {
-        for(Iterator<APIServiceCallback> iterator = subscribers.iterator(); iterator.hasNext();){
-            APIServiceCallback subscriber = iterator.next();
-            subscriber.apiResponseListener(isSuccess,originalPayload, payload, apiUrl, requestType);
-        }
+            for(Iterator<APIServiceCallback> iterator = subscribers.iterator(); iterator.hasNext();){
+                APIServiceCallback subscriber = iterator.next();
+                subscriber.apiResponseListener(isSuccess,originalPayload, payload, apiUrl, requestType);
+            }
     }
 
     @Override
@@ -179,11 +180,11 @@ public class APIService implements APIServiceCallback{
         return APIService.apiService;
     }
 
-    public static void addSubscriber(APIServiceCallback subscriber){
+    public static synchronized void addSubscriber(APIServiceCallback subscriber){
         subscribers.add(subscriber);
     }
 
-    public static void removeSubscriber(APIServiceCallback subscriber){
+    public static synchronized void removeSubscriber(APIServiceCallback subscriber){
         subscribers.remove(subscriber);
     }
 }

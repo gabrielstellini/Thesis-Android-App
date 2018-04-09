@@ -14,6 +14,9 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 
+import java.util.Iterator;
+
+import Model.RequestResponseTypes.DataPoint;
 import Model.RequestType;
 import Services.APIService;
 import Services.CalibrationCallback;
@@ -51,18 +54,44 @@ public class CalibrateFragment extends Fragment {
 
         //start recording band data
         bandRecorder.startRecording(statusText);
+        finishCalibration();
+    }
 
-        //stop recording after 10minutes
+    /**
+     * Calibration will finish if some of the datapoints are valid. If not, it will recurse
+     */
+    public void finishCalibration(){
         final Handler bandHandler = new Handler();
+
+
         bandHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                bandRecorder.stopRecording();
-                pushCalmData();
-                callback.calibrationDone();
+                int correctDataPoints = 0;
+                DataStore.pauseRecording = true;
+                for(Iterator<DataPoint> iterator = DataStore.dataPoints.iterator(); iterator.hasNext();){
+
+                    DataPoint datapoint = iterator.next();
+
+                    if (datapoint.getQuality().equals("LOCKED") && datapoint.getContactStatus().equals("WORN"))
+                    {
+                        correctDataPoints++;
+                    }
+                }
+
+                if (correctDataPoints > 0) {
+                    //stop recording after 10minutes if data is valid
+                    bandRecorder.stopRecording();
+                    pushCalmData();
+                    callback.calibrationDone();
+                    DataStore.pauseRecording = false;
+                }
+                else {
+                    finishCalibration();
+                    DataStore.pauseRecording = false;
+                }
             }
-//            }, 600000);
-        }, 20000);
+        }, recordPeriodMillis);
     }
 
     public void pushCalmData(){

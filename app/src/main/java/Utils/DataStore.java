@@ -12,10 +12,13 @@ import Model.RequestResponseTypes.DataPoint;
 public class DataStore implements BandAccelerometerEventListener {
     static BandSensorData bandSensorData = new BandSensorData();
     public static LinkedList<DataPoint> dataPoints = new LinkedList<>();
+    public static boolean pauseRecording = false;
 
     @Override
     public void onBandAccelerometerChanged(BandAccelerometerEvent event) {
-        addDataPoint(event);
+        if(!pauseRecording){
+            addDataPoint(event);
+        }
     }
 
     private void addDataPoint(BandAccelerometerEvent event) {
