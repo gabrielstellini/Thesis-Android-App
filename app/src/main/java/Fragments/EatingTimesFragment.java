@@ -95,10 +95,28 @@ public class EatingTimesFragment extends Fragment implements APIServiceCallback 
             if(times[i].after(times[i+1]) || times[i].getTime() == times[i+1].getTime()){
                 valid = false;
             }
+
+            //not more than 2 hour difference
+            if(times[i].getTime() - times[i+1].getTime() > 0 && times[i].getTime() - times[i+1].getTime() > 7200000){
+                valid = false;
+            }
+
+            if(times[i].getTime() - times[i+1].getTime() < 0 && times[i].getTime() - times[i+1].getTime() < -7200000){
+                valid = false;
+            }
+
+            //not less than 10min
+            if(times[i].getTime() - times[i+1].getTime() > 0 && times[i].getTime() - times[i+1].getTime() < 600000){
+                valid = false;
+            }
+
+            if(times[i].getTime() - times[i+1].getTime() < 0 && times[i].getTime() - times[i+1].getTime() > -600000){
+                valid = false;
+            }
         }
 
         if(!valid){
-            Toast.makeText(getActivity(), "Invalid time, please make sure the times the start and end times are after each other", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Invalid times, make sure they are not more than 1 hour apart and are after each other", Toast.LENGTH_SHORT).show();
         }
         else {
             postData(times);
