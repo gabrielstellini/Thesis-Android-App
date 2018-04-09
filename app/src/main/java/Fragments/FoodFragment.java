@@ -25,6 +25,7 @@ import android.app.Fragment;
 
 import com.google.gson.Gson;
 import com.jaouan.revealator.Revealator;
+import java.util.Iterator;
 
 public class FoodFragment extends Fragment implements APIServiceCallback {
     private final int recordPeriodMillis = 20000;
@@ -91,14 +92,7 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
                 Revealator.reveal(mRevealView)
                         .from(floatingActionButton)
                         .withCurvedTranslation()
-                        //.withCurvedTranslation(curvePoint)
-                        //.withChildsAnimation()
-                        //.withDelayBetweenChildAnimation(...)
-                        //.withChildAnimationDuration(...)
-                        // .withTranslateDuration(500)
-                        //.withHideFromViewAtTranslateInterpolatedTime(...)
                         .withRevealDuration(500)
-                        //.withEndAction(...)
                         .start();
             }
         });
@@ -149,24 +143,50 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
 
         //start recording band data
         if(!isRecording){
-            bandRecorder.startRecording((TextView)getActivity().findViewById(R.id.statusText));
+            finishDataCollection();
+        }
+    }
 
-            //stop recording after 10minutes
-            final Handler bandHandler = new Handler();
-            bandHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
+    /**
+     * Data collection will finish if some of the datapoints are valid. If not, it will recurse
+     */
+    public void finishDataCollection(){
+        bandRecorder.startRecording((TextView)getActivity().findViewById(R.id.statusText));
+
+        //stop recording after 10minutes
+        final Handler bandHandler = new Handler();
+        bandHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                int correctDataPoints = 0;
+                DataStore.pauseRecording = true;
+
+                for(Iterator<DataPoint> iterator = DataStore.dataPoints.iterator(); iterator.hasNext();){
+
+                    DataPoint datapoint = iterator.next();
+                    if (datapoint.getQuality().equals("LOCKED") && datapoint.getContactStatus().equals("WORN"))
+                    {
+                        correctDataPoints++;
+                    }
+                }
+
+
+                if (correctDataPoints > 0) {
+                    //stop recording after 10minutes if data is valid
                     bandRecorder.stopRecording();
                     isRecording = false;
                     //push data when sample is ready
                     pushStressData();
+                    DataStore.pauseRecording = false;
                 }
+                else {
+                    finishDataCollection();
+                    DataStore.pauseRecording = false;
+                }
+            }
 //            }, 600000);
-            }, recordPeriodMillis);
-        }
+        }, recordPeriodMillis);
     }
-
-
 
     public void getData() {
         APIService.getInstance().callAPI("food", getActivity(), RequestType.GET, "");
@@ -251,7 +271,6 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        bandRecorder.onDestroy();
         APIService.removeSubscriber(this);
     }
 
@@ -260,16 +279,5 @@ public class FoodFragment extends Fragment implements APIServiceCallback {
         String payload = gson.toJson(DataStore.dataPoints.toArray());
         APIService.getInstance().callAPI("datapoint", getActivity(), RequestType.POST, payload);
         DataStore.dataPoints.clear();
-    }
-
-
-    public void pushDummyCalmStressData(){
-        Gson gson = new Gson();
-        DataPoint[] dataPoints = new DataPoint[3];
-        dataPoints[0] = new DataPoint(1522711001, 80,0.79123,2000.1, "LOCKED", "WORN");
-        dataPoints[1] = new DataPoint(1522711301, 80, 0.95123,3000.1, "LOCKED", "WORN");
-        dataPoints[2] = new DataPoint(1522711401, 82, 0.90123,3100.1, "LOCKED", "WORN");
-        String payload = gson.toJson(dataPoints);
-        APIService.getInstance().callAPI("datapoint", getActivity(), RequestType.POST, payload);
     }
 }
