@@ -183,11 +183,11 @@ public class DashboardFragment extends Fragment implements APIServiceCallback{
             long dayDifference = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 
             if(dayDifference <= 1){
-                caloriesTodayInt += food.getCalories();
+                caloriesTodayInt += food.getCalories() * food.getQuantity();
             }
 
             if(dayDifference <= 7){
-                caloriesThisWeekInt += food.getCalories();
+                caloriesThisWeekInt += food.getCalories() * food.getQuantity();
             }
         }
 
