@@ -3,6 +3,7 @@ package Fragments;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,6 +42,9 @@ public class FriendsFragment extends Fragment implements APIServiceCallback, ICa
 
     private Gson gson = new Gson();
     private LinkedList<UserScore> userScores = new LinkedList<>();
+
+    int totalToRecieve = 0;
+    int totalRecieved = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -114,7 +118,12 @@ public class FriendsFragment extends Fragment implements APIServiceCallback, ICa
 
                 UserScore userScore = gson.fromJson(payload, UserScore.class);
                 this.userScores.add(userScore);
-                refreshTable();
+                totalRecieved++;
+
+                if(totalRecieved == totalToRecieve){
+                    refreshTable();
+                }
+
             }else if (apiUrl.matches(".*search.*") && requestType == RequestType.GET) {
 //                TODO: fix same issue as above
                 try{
@@ -133,10 +142,15 @@ public class FriendsFragment extends Fragment implements APIServiceCallback, ICa
 
 
     private void getScores(Friends friends){
+        totalToRecieve = friends.getFriends().length;
+        totalRecieved = 0;
+
         for(int i = 0; i<friends.getFriends().length; i++){
             String authId = friends.getFriends()[i];
             APIService.getInstance().callAPI("score/"+authId, getActivity(), RequestType.GET, "");
         }
+
+
     }
 
     private void refreshTable(){
@@ -262,5 +276,14 @@ public class FriendsFragment extends Fragment implements APIServiceCallback, ICa
         Gson gson = new Gson();
         String payload = gson.toJson(friend);
         APIService.getInstance().callAPI("friends", getActivity(), RequestType.POST, payload);
+
+        //refresh friend data
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getData();
+            }
+        }, 1000);
     }
 }
