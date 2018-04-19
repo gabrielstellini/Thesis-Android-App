@@ -2,7 +2,6 @@ package Services;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
@@ -21,18 +20,17 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import Model.RequestType;
 
 
+/**
+ * Class used through callbacks to communicate with the server
+ */
+
 public class APIService implements APIServiceCallback{
-    //    private static final String BASE_API_URL = "http://10.0.0.6:3010/";
-    private static final String BASE_API_URL = "http://192.168.4.154:3010/";
-    //    private static final String BASE_API_URL = "http://192.168.8.102:3010/";
-//    private static final String BASE_API_URL = "http://localhost:3010/";
-//    private static final String BASE_API_URL = "http://10.0.0.2:3010/";
+    private static final String BASE_API_URL = "http://192.168.43.51:3010/";
     private static final String API_IDENTIFIER = "Android";
     private static String accessToken;
 
