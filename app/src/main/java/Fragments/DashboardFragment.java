@@ -40,7 +40,6 @@ public class DashboardFragment extends Fragment implements APIServiceCallback{
         View view = inflater.inflate(R.layout.fragment_dashboard,
                 container, false);
 
-//        TODO: Comment me when I want to skip login
         initialise(view);
 
         return view;

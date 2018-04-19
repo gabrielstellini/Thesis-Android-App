@@ -59,8 +59,6 @@ public class EatingTimesFragment extends Fragment implements APIServiceCallback 
             initialiseTimePicker(timePickers.get(i+1));
         }
 
-//      TODO: add and remove dynamically with a button
-
         Button submitBtn = view.findViewById(R.id.submitBtn);
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override

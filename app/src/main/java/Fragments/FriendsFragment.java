@@ -112,10 +112,6 @@ public class FriendsFragment extends Fragment implements APIServiceCallback, ICa
                 getScores(friends);
             }
             else if (apiUrl.matches(".*score.*") && requestType == RequestType.GET) {
-//                TODO: fix issue - if user has too many scores or switches the view too quickly, the api might still be responding
-//                Solution a: API service needs to be tied to this fragment
-//                Solution b: pagination
-
                 UserScore userScore = gson.fromJson(payload, UserScore.class);
                 this.userScores.add(userScore);
                 totalRecieved++;
@@ -125,7 +121,6 @@ public class FriendsFragment extends Fragment implements APIServiceCallback, ICa
                 }
 
             }else if (apiUrl.matches(".*search.*") && requestType == RequestType.GET) {
-//                TODO: fix same issue as above
                 try{
                     User[] userResults = gson.fromJson(payload, User[].class);
                     refreshResults(userResults);
