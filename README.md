@@ -10,7 +10,7 @@ This then calculates a score based on several factors, mainly:
  2. calories consumed 
  3. time the food was eaten
 
-Users can then view each other's scores and 
+Other features include viewing a food eaten history, as well as viewing other users' scores. The full writeup on the project can be found [in my dissertation](https://github.com/gabrielstellini/Thesis-Android-App/blob/master/Thesis%20writeup%20-%20final.pdf)
 
 ## Getting started
 
