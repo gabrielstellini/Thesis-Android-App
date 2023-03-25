@@ -29,3 +29,18 @@ The app was built for android 5.0 lollipop, however it was also tested on Androi
 
 ### License
 This project is Licensed under the MIT License.
+
+<details>
+  <summary>Screenshots</summary>
+  
+
+![Screenshot_2018-04-13-15-50-41](https://user-images.githubusercontent.com/16836689/227718195-ab37ece3-77f5-4799-8710-338700e71011.png)
+![Screenshot_2018-04-13-15-50-54](https://user-images.githubusercontent.com/16836689/227718198-32abd2f5-a4eb-4b15-aac1-5ba49ab9e2aa.png)
+![Screenshot_2018-04-13-15-51-12](https://user-images.githubusercontent.com/16836689/227718217-020f4685-fb8a-4a2f-835b-dee49c9b68c8.png)
+![Screenshot_2018-04-13-15-51-56](https://user-images.githubusercontent.com/16836689/227718250-02ad89cc-8cd5-4857-8ef6-af0bfc79d863.png)
+![Screenshot_2018-04-13-15-52-51](https://user-images.githubusercontent.com/16836689/227718278-83615dcf-0b4b-4f72-a053-2810529ebf74.png)
+![Screenshot_2018-04-13-15-54-08](https://user-images.githubusercontent.com/16836689/227718236-7435494e-56eb-4495-823f-a549ea5c2289.png)
+![Screenshot_2018-04-06-12-30-41](https://user-images.githubusercontent.com/16836689/227718304-8fdd9a2f-3e82-4c44-8f29-805402971fde.png)
+</details>
+
+
